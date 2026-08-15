@@ -1,0 +1,824 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visita técnica post-sismo — INICON</title>
+<!-- Fuera de los buscadores: la herramienta existe para quien tenga el enlace, no para
+     quien busque «evaluación post sismo». No es un candado —quien tenga la dirección
+     entra— pero evita que llegue nadie por casualidad. Los datos de las visitas NO
+     están aquí: viven en Supabase tras login y lista blanca de correos. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Formato de campo de INICON para evaluación rápida de estructuras tras un sismo.">
+<!-- Instalable en la pantalla de inicio del teléfono -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#185FA5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Visita Sismo">
+<link rel="apple-touch-icon" href="icono-180.png">
+<link rel="icon" href="icono-180.png">
+<style>
+:root{
+  --bg:#eef1f5; --surface:#fff; --surface-2:#f3f5f8; --text:#232a31; --dim:#6b7480;
+  --border:#d9dee6; --accent:#185FA5; --verde:#1D9E75; --amarillo:#E0A21E; --rojo:#D8443A;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+body{margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding-bottom:154px}
+header{position:sticky; top:0; z-index:20; background:var(--accent); color:#fff;
+  padding:12px 16px calc(12px + env(safe-area-inset-top)); box-shadow:0 2px 10px rgba(0,0,0,.15)}
+header h1{margin:0; font-size:17px} header .sub{font-size:12.5px; opacity:.9; margin-top:2px}
+main{padding:12px}
+section{background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  margin-bottom:12px; overflow:hidden}
+section>h2{margin:0; padding:13px 15px; font-size:15px; background:var(--surface-2);
+  border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center}
+.cuerpo{padding:13px 15px}
+label{display:block; margin-bottom:11px}
+label>span{display:block; font-size:13px; color:var(--dim); margin-bottom:4px}
+input,select,textarea{width:100%; font:inherit; padding:11px 12px; border:1px solid var(--border);
+  border-radius:9px; background:#fff; color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent); outline-offset:-1px}
+textarea{min-height:76px; resize:vertical}
+.fila{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.fila3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+/* escala de daño: botones grandes para usar con una mano y guantes */
+.dano{display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:9px 0; border-bottom:1px dashed var(--border)}
+.dano:last-child{border-bottom:none}
+.dano .nom{font-size:14.5px; flex:1}
+.grados{display:flex; gap:5px; flex:0 0 auto}
+.grados button{width:42px; height:42px; border:1px solid var(--border); background:#fff;
+  border-radius:9px; font-size:15px; font-weight:600; color:var(--dim); cursor:pointer}
+.grados button.on{color:#fff; border-color:transparent}
+.grados button.on[data-g="0"]{background:var(--verde)}
+.grados button.on[data-g="1"]{background:#9CBF3B}
+.grados button.on[data-g="2"]{background:var(--amarillo)}
+.grados button.on[data-g="3"]{background:var(--rojo)}
+.chk{display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px dashed var(--border)}
+.chk:last-child{border-bottom:none}
+.chk input{width:24px; height:24px; flex:0 0 auto}
+.chk span{font-size:14.5px}
+/* dictamen */
+.dict{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:4px 0 12px}
+.dict button{padding:16px 6px; border:2px solid var(--border); background:#fff; border-radius:11px;
+  font-size:14px; font-weight:700; cursor:pointer; color:var(--dim)}
+.dict button[data-c="verde"].on{background:var(--verde); border-color:var(--verde); color:#fff}
+.dict button[data-c="amarillo"].on{background:var(--amarillo); border-color:var(--amarillo); color:#fff}
+.dict button[data-c="rojo"].on{background:var(--rojo); border-color:var(--rojo); color:#fff}
+.sug{font-size:13px; padding:10px 12px; border-radius:9px; background:var(--surface-2);
+  border:1px solid var(--border); margin-bottom:10px}
+.sug b{color:var(--accent)}
+.nota{font-size:12.5px; color:var(--dim); line-height:1.45}
+/* fotos */
+.foto-btn{width:100%; padding:15px; border:2px dashed var(--accent); background:var(--surface-2);
+  color:var(--accent); border-radius:11px; font-size:15px; font-weight:600; cursor:pointer}
+.galeria{display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px}
+.miniatura{position:relative; aspect-ratio:1; border-radius:9px; overflow:hidden;
+  border:1px solid var(--border); background:var(--surface-2); cursor:pointer}
+.miniatura img{width:100%; height:100%; object-fit:cover; display:block}
+.miniatura .pie{position:absolute; left:0; right:0; bottom:0; background:rgba(0,0,0,.62); color:#fff;
+  font-size:10.5px; padding:3px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.visor{position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.9); display:none;
+  flex-direction:column; padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
+.visor img{flex:1; min-height:0; object-fit:contain; width:100%}
+.visor .ctrl{background:var(--surface); border-radius:11px; padding:12px; margin-top:10px}
+.visor .ctrl .fila{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px}
+.visor .ctrl button{padding:12px; border-radius:9px; border:1px solid var(--border); background:#fff;
+  font-size:14px; font-weight:600; cursor:pointer}
+.visor .ctrl button.del{background:var(--rojo); color:#fff; border-color:var(--rojo)}
+.barra{position:fixed; left:0; right:0; bottom:0; z-index:30; background:var(--surface);
+  border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  display:grid; grid-template-columns:1fr 1fr; gap:8px; box-shadow:0 -2px 12px rgba(0,0,0,.08)}
+.barra button{padding:14px 6px; border-radius:10px; border:1px solid var(--border);
+  background:#fff; font-size:14px; font-weight:600; cursor:pointer; color:var(--text)}
+.barra button.pri{background:var(--accent); color:#fff; border-color:var(--accent); grid-column:1/-1}
+.barra button.rec{border-color:var(--accent); color:var(--accent)}
+/* Caja de copia a mano: el último recurso cuando el teléfono bloquea el portapapeles. */
+.copia{position:fixed; inset:0; z-index:70; background:rgba(0,0,0,.88); display:none;
+  flex-direction:column; padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
+.copia textarea{flex:1; min-height:0; width:100%; font:12px/1.35 ui-monospace,Menlo,Consolas,monospace;
+  padding:10px; border-radius:9px; border:1px solid var(--border); background:#fff; color:#111}
+.copia .fila{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px}
+.copia .fila button{padding:14px; border-radius:10px; border:1px solid var(--border);
+  background:#fff; font-size:14px; font-weight:600; cursor:pointer}
+.copia .fila button.pri{background:var(--accent); color:#fff; border-color:var(--accent)}
+.copia p{color:#fff; font-size:13px; margin:0 0 8px}
+/* El estado iba al final de la página y quedaba TAPADO por la barra fija de botones: los avisos
+   no se veían. Ahora flota justo encima de la barra y no hay forma de perdérselo. */
+#estado{position:fixed; left:8px; right:8px; z-index:28;
+  bottom:calc(128px + env(safe-area-inset-bottom));
+  font-size:13.5px; line-height:1.4; padding:11px 14px; border-radius:10px;
+  background:#2b3138; color:#fff; box-shadow:0 4px 14px rgba(0,0,0,.25);
+  opacity:0; transform:translateY(8px); pointer-events:none; transition:opacity .18s, transform .18s}
+#estado.ver{opacity:1; transform:translateY(0)}
+#estado.mal{background:var(--rojo)}
+.lista{font-size:13.5px}
+.lista div{padding:9px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;
+  align-items:center; gap:8px}
+.lista div span:first-child{flex:1; min-width:0}
+/* Área de toque de 40 px: si es más pequeño se pulsa por error, y esto borra. */
+.lista button.borrar{flex:none; width:40px; height:40px; border-radius:9px; border:1px solid var(--border);
+  background:#fff; color:var(--rojo); font-size:16px; line-height:1; cursor:pointer}
+.lista div:last-child{border-bottom:none}
+.pill{font-size:11px; font-weight:700; color:#fff; padding:2px 8px; border-radius:20px}
+.pill.verde{background:var(--verde)} .pill.amarillo{background:var(--amarillo)} .pill.rojo{background:var(--rojo)}
+.pill.sin{background:var(--dim)}
+@media(min-width:760px){ main{max-width:820px; margin:0 auto} }
+</style>
+
+<header>
+  <h1>Visita técnica post-sismo</h1>
+  <div class="sub">INICON · <b>web</b> · funciona sin señal · se guarda en este navegador</div>
+</header>
+
+<main>
+  <section>
+    <h2>1 · Identificación</h2>
+    <div class="cuerpo">
+      <label><span>Estructura / nombre</span><input id="estructura" placeholder="Edificio Los Almendros"></label>
+      <label><span>Dirección</span><input id="direccion" placeholder="Cra 45 #12-30"></label>
+      <div class="fila">
+        <label><span>Municipio</span><input id="municipio"></label>
+        <label><span>Fecha de visita</span><input id="fecha" type="date"></label>
+      </div>
+      <div class="fila">
+        <label><span>Solicitante</span><input id="solicitante"></label>
+        <label><span>Profesional</span><input id="profesional"></label>
+      </div>
+      <label><span>Matrícula profesional</span><input id="matricula"></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>2 · La edificación</h2>
+    <div class="cuerpo">
+      <div class="fila">
+        <label><span>Uso</span>
+          <select id="uso"><option value="">—</option><option>Residencial</option><option>Oficinas</option>
+          <option>Comercio</option><option>Educativo</option><option>Salud</option><option>Industrial</option>
+          <option>Institucional</option><option>Mixto</option><option>Otro</option></select></label>
+        <label><span>Sistema estructural</span>
+          <select id="sistema"><option value="">—</option><option>Pórtico de concreto</option>
+          <option>Muros de concreto</option><option>Dual (pórtico + muros)</option>
+          <option>Mampostería confinada</option><option>Mampostería reforzada</option>
+          <option>Mampostería no reforzada</option><option>Pórtico de acero</option>
+          <option>Bahareque / madera</option><option>Mixto</option><option>No identificado</option></select></label>
+      </div>
+      <div class="fila3">
+        <label><span>Pisos</span><input id="pisos" type="number" inputmode="numeric" min="1"></label>
+        <label><span>Sótanos</span><input id="sotanos" type="number" inputmode="numeric" min="0"></label>
+        <label><span>Año</span><input id="ano" type="number" inputmode="numeric" placeholder="1985"></label>
+      </div>
+      <label><span>Área aproximada (m²)</span><input id="area" type="number" inputmode="decimal"></label>
+      <label><span>Evento</span><input id="evento" placeholder="Sismo del lunes 10 de agosto"></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · Daño estructural</h2>
+    <div class="cuerpo">
+      <div class="nota" style="margin-bottom:8px">0 ninguno · 1 leve · 2 moderado · 3 severo. Deja en blanco lo que no observaste.</div>
+      <div id="gEst"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 · Daño no estructural</h2>
+    <div class="cuerpo"><div id="gNoEst"></div></div>
+  </section>
+
+  <section>
+    <h2>5 · Sitio y entorno</h2>
+    <div class="cuerpo"><div id="gSitio"></div></div>
+  </section>
+
+  <section>
+    <h2>6 · Fotos <span class="nota" id="nFotos"></span></h2>
+    <div class="cuerpo">
+      <input type="file" id="camara" accept="image/*" capture="environment" multiple style="display:none" onchange="agregarFotos(this)">
+      <button class="foto-btn" onclick="document.getElementById('camara').click()">📷 Tomar o elegir fotos</button>
+      <div class="nota" style="margin:8px 0">Se reducen a 1280 px antes de guardarse, para que quepan muchas. Toca una para describirla o borrarla.</div>
+      <div id="galeria" class="galeria"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>7 · Dictamen</h2>
+    <div class="cuerpo">
+      <div class="sug" id="sugerencia">Registra los daños y aquí verás una <b>sugerencia</b> de apoyo.</div>
+      <div class="dict">
+        <button data-c="verde"    onclick="setDict('verde')">VERDE<br><span style="font-weight:400;font-size:11px">Habitable</span></button>
+        <button data-c="amarillo" onclick="setDict('amarillo')">AMARILLO<br><span style="font-weight:400;font-size:11px">Uso restringido</span></button>
+        <button data-c="rojo"     onclick="setDict('rojo')">ROJO<br><span style="font-weight:400;font-size:11px">No habitable</span></button>
+      </div>
+      <label><span>Restricciones de uso</span><textarea id="restricciones" placeholder="Qué zonas quedan fuera de servicio, accesos, plazos…"></textarea></label>
+      <label><span>Recomendaciones</span><textarea id="recomendaciones" placeholder="Apuntalamiento, demolición parcial, monitoreo…"></textarea></label>
+      <div class="chk"><input type="checkbox" id="detallada"><span>Requiere evaluación detallada</span></div>
+      <div class="chk"><input type="checkbox" id="evacuacion"><span>Evacuación inmediata</span></div>
+      <label><span>Observaciones</span><textarea id="observaciones"></textarea></label>
+      <div class="nota" style="margin-top:6px">La clasificación es tuya y queda firmada con tu nombre y matrícula. La sugerencia de arriba solo ordena lo que registraste.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Visitas guardadas <span class="nota" id="cuenta"></span></h2>
+    <div class="cuerpo">
+      <div class="lista" id="lista"></div>
+      <button id="btnEnviar" onclick="enviarAlHarness()" style="display:none; width:100%; margin-top:12px;
+        padding:14px; border-radius:10px; border:1px solid var(--accent); background:var(--accent);
+        color:#fff; font-size:14px; font-weight:600; cursor:pointer">Enviar al harness</button>
+      <div class="nota" style="border-top:1px solid var(--border); margin-top:8px; padding-top:12px">
+        Para pasar las visitas a «Visitas técnicas — consulta», usa <b>Copiar JSON</b> y pégalo allí.
+        El texto va sin las fotos; volver a subirlo <b>no borra</b> las que ya estén en la base.
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="visor" id="visor">
+  <img id="visorImg" alt="">
+  <div class="ctrl">
+    <label style="margin:0"><span>Descripción de la foto</span>
+      <input id="visorDesc" placeholder="Fisura en columna eje B, piso 3"></label>
+    <label style="margin:8px 0 0"><span>Elemento</span>
+      <select id="visorElem">
+        <option value="">—</option><option>Columna</option><option>Viga</option>
+        <option>Muro estructural</option><option>Losa</option><option>Nudo / conexión</option>
+        <option>Cimentación</option><option>Muro divisorio</option><option>Fachada</option>
+        <option>Cielo raso</option><option>Escalera</option><option>Terreno</option>
+        <option>Vista general</option><option>Otro</option></select></label>
+    <div class="fila">
+      <button class="del" onclick="borrarFoto()">Borrar</button>
+      <button onclick="cerrarVisor()">Listo</button>
+    </div>
+  </div>
+</div>
+
+<div class="copia" id="copiaBox">
+  <p>Todo el texto de abajo es lo que hay que pegar en «Visitas técnicas — consulta».
+     <b id="copiaInfo"></b></p>
+  <textarea id="copiaTxt" readonly></textarea>
+  <div class="fila">
+    <button onclick="cerrarCopia()">Cerrar</button>
+    <button class="pri" onclick="copiarDesdeCaja()">Copiar todo</button>
+  </div>
+</div>
+
+<div id="estado"></div>
+<div class="barra">
+  <!-- Sin «Exportar»: una página alojada no puede descargar archivos al teléfono, el navegador
+       lo bloquea. «Copiar JSON» hace lo mismo sin tocar el sistema de archivos, y era ya el
+       camino recomendado. -->
+  <button onclick="nueva()">Nueva</button>
+  <button class="rec" onclick="copiarJSON()">Copiar JSON</button>
+  <button class="pri" onclick="guardar()">Guardar visita</button>
+</div>
+
+<script>
+var EST=[["d_columnas","Columnas"],["d_vigas","Vigas"],["d_muros_est","Muros estructurales"],
+         ["d_losas","Losas / entrepisos"],["d_conexiones","Nudos y conexiones"],["d_cimentacion","Cimentación"]];
+var NOEST=[["d_muros_div","Muros divisorios"],["d_fachada","Fachada"],["d_cielos","Cielos rasos"],
+           ["d_escaleras","Escaleras"],["d_instalaciones","Instalaciones"]];
+var SITIO=[["asentamiento","Asentamiento del terreno"],["grietas_terreno","Grietas en el terreno"],
+           ["deslizamiento","Deslizamiento o talud inestable"],["riesgo_edif_vecino","Riesgo del edificio vecino"],
+           ["riesgo_caida_objetos","Riesgo de caída de objetos"],["inclinacion_visible","Inclinación visible del edificio"]];
+var danos={}, chks={}, dict=null;
+function $(i){return document.getElementById(i);}
+
+function pintarGrados(cont,lista){
+  cont.innerHTML=lista.map(function(x){
+    return "<div class='dano'><div class='nom'>"+x[1]+"</div><div class='grados' data-k='"+x[0]+"'>"+
+      [0,1,2,3].map(function(g){return "<button data-g='"+g+"' onclick=\"setDano('"+x[0]+"',"+g+",this)\">"+g+"</button>";}).join("")+
+      "</div></div>";
+  }).join("");
+}
+function pintarChks(cont,lista){
+  cont.innerHTML=lista.map(function(x){
+    return "<div class='chk'><input type='checkbox' id='c_"+x[0]+"' onchange=\"setChk('"+x[0]+"',this.checked)\"><span>"+x[1]+"</span></div>";
+  }).join("");
+}
+function setDano(k,g,btn){
+  var grupo=btn.parentNode;
+  if(danos[k]===g){ delete danos[k]; grupo.querySelectorAll("button").forEach(function(b){b.classList.remove("on");}); }
+  else { danos[k]=g; grupo.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", +b.dataset.g===g); }); }
+  sugerir(); guardarBorrador();
+}
+function setChk(k,v){ chks[k]=v; sugerir(); guardarBorrador(); }
+function setDict(c){
+  dict=(dict===c)?null:c;
+  document.querySelectorAll(".dict button").forEach(function(b){ b.classList.toggle("on", b.dataset.c===dict); });
+  guardarBorrador();
+}
+// Misma lógica que la del servidor, para que el criterio no cambie según dónde se mire.
+function sugerir(){
+  var d=function(k){ return danos[k]===undefined? 0 : danos[k]; };
+  var s;
+  if(chks.evacuacion || d("d_columnas")===3||d("d_vigas")===3||d("d_muros_est")===3||
+     d("d_losas")===3||d("d_conexiones")===3||d("d_cimentacion")===3||
+     chks.inclinacion_visible||chks.deslizamiento) s="rojo";
+  else if(d("d_columnas")===2||d("d_vigas")===2||d("d_muros_est")===2||d("d_losas")===2||
+     d("d_conexiones")===2||d("d_cimentacion")===2||d("d_muros_div")===3||d("d_cielos")===3||
+     d("d_fachada")>=2||d("d_escaleras")>=2||chks.asentamiento||chks.grietas_terreno||
+     chks.riesgo_edif_vecino||chks.riesgo_caida_objetos) s="amarillo";
+  else s="verde";
+  var txt={verde:"sin daño estructural relevante",amarillo:"hay daño moderado o riesgo de caída",rojo:"hay daño severo o riesgo inmediato"};
+  $("sugerencia").innerHTML="Por lo registrado, esto apunta a <b>"+s.toUpperCase()+"</b> — "+txt[s]+
+    ". <span class='nota'>Es solo un apoyo: el dictamen lo pones tú.</span>";
+  return s;
+}
+/* ================= BORRADOR AUTOMÁTICO =================
+   Al abrir la cámara, el navegador del móvil descarga la página para dejarle memoria a la app de
+   fotos, y al volver la recarga desde cero: se perdía todo lo escrito. Por eso el formulario se
+   guarda entero en cada cambio y se restaura al cargar. También cubre cierres accidentales,
+   llamadas entrantes y batería agotada. */
+var CAMPOS=["estructura","direccion","municipio","fecha","solicitante","profesional","matricula",
+  "uso","sistema","pisos","sotanos","ano","area","evento","restricciones","recomendaciones","observaciones"];
+var _restaurando=false;
+function guardarBorrador(){
+  if(_restaurando) return;
+  try{
+    var o={};
+    CAMPOS.forEach(function(k){ var e=$(k); if(e) o[k]=e.value; });
+    o._danos=danos; o._chks=chks; o._dict=dict;
+    o._detallada=$("detallada")?$("detallada").checked:false;
+    o._evacuacion=$("evacuacion")?$("evacuacion").checked:false;
+    o._fotos=fotos.map(function(f){ return {id:f.id, desc:f.desc||"", elemento:f.elemento||"", ts:f.ts}; });
+    o._ts=Date.now();
+    localStorage.setItem("visita_borrador", JSON.stringify(o));
+  }catch(e){}
+}
+function hayBorrador(){
+  try{ var b=JSON.parse(localStorage.getItem("visita_borrador")||"null");
+    if(!b) return null;
+    var algo=CAMPOS.some(function(k){ return (b[k]||"").trim()!==""; }) ||
+             Object.keys(b._danos||{}).length>0 || (b._fotos||[]).length>0;
+    return algo? b : null;
+  }catch(e){ return null; }
+}
+function restaurarBorrador(b){
+  _restaurando=true;
+  CAMPOS.forEach(function(k){ var e=$(k); if(e && b[k]!==undefined) e.value=b[k]; });
+  danos=b._danos||{}; chks=b._chks||{}; dict=b._dict||null;
+  if($("detallada")) $("detallada").checked=!!b._detallada;
+  if($("evacuacion")) $("evacuacion").checked=!!b._evacuacion;
+  // repintar los botones de daño
+  Object.keys(danos).forEach(function(k){
+    var g=document.querySelector(".grados[data-k='"+k+"']");
+    if(g) g.querySelectorAll("button").forEach(function(bt){ bt.classList.toggle("on", +bt.dataset.g===danos[k]); });
+  });
+  Object.keys(chks).forEach(function(k){ var c=$("c_"+k); if(c) c.checked=!!chks[k]; });
+  document.querySelectorAll(".dict button").forEach(function(bt){ bt.classList.toggle("on", bt.dataset.c===dict); });
+  // las imágenes viven en IndexedDB y sobreviven a la recarga
+  var metas=b._fotos||[];
+  if(metas.length){
+    leerFotosBD(metas.map(function(m){ return m.id; })).then(function(imgs){
+      var porId={}; imgs.forEach(function(f){ porId[f.id]=f; });
+      fotos = metas.map(function(m){
+        var g=porId[m.id];
+        return g? {id:g.id, dataUrl:g.dataUrl, desc:m.desc, elemento:m.elemento, ts:m.ts} : null;
+      }).filter(Boolean);
+      pintarGaleria();
+    });
+  }
+  _restaurando=false;
+  sugerir();
+  msg("Se recuperó lo que tenías a medias"+(b._ts? " ("+new Date(b._ts).toLocaleTimeString("es-CO")+")":"")+".");
+}
+function limpiarBorrador(){ try{ localStorage.removeItem("visita_borrador"); }catch(e){} }
+
+/* ====================== FOTOS ======================
+   Se guardan en IndexedDB, no en localStorage: en localStorage caben ~5 MB y un día de visitas
+   son decenas de fotos. Antes de guardar se reducen a 1280 px y se recomprimen a JPEG, con lo
+   que cada una queda en torno a 150 KB en vez de los 3-5 MB que saca la cámara del teléfono. */
+var fotos=[];              // fotos de la visita en curso: {id, dataUrl, desc, elemento, ts}
+var _bd=null, _fotoAbierta=null;
+function abrirBD(){
+  return new Promise(function(res,rej){
+    if(_bd) return res(_bd);
+    var q=indexedDB.open("visitas_fotos",1);
+    q.onupgradeneeded=function(e){ var db=e.target.result;
+      if(!db.objectStoreNames.contains("fotos")) db.createObjectStore("fotos",{keyPath:"id"}); };
+    q.onsuccess=function(e){ _bd=e.target.result; res(_bd); };
+    q.onerror=function(){ rej(q.error); };
+  });
+}
+function guardarFotoBD(f){
+  return abrirBD().then(function(db){ return new Promise(function(res,rej){
+    var t=db.transaction("fotos","readwrite"); t.objectStore("fotos").put(f);
+    t.oncomplete=res; t.onerror=function(){ rej(t.error); }; }); });
+}
+function borrarFotoBD(id){
+  return abrirBD().then(function(db){ return new Promise(function(res){
+    var t=db.transaction("fotos","readwrite"); t.objectStore("fotos").delete(id);
+    t.oncomplete=res; t.onerror=res; }); });
+}
+function leerFotosBD(ids){
+  if(!ids||!ids.length) return Promise.resolve([]);
+  return abrirBD().then(function(db){ return new Promise(function(res){
+    var t=db.transaction("fotos","readonly"), s=t.objectStore("fotos"), out=[];
+    ids.forEach(function(id){ var q=s.get(id); q.onsuccess=function(){ if(q.result) out.push(q.result); }; });
+    t.oncomplete=function(){ res(out); }; t.onerror=function(){ res(out); }; }); });
+}
+// Reduce la foto antes de guardarla. Devuelve un JPEG en dataURL.
+function comprimir(file,maxLado,calidad){
+  return new Promise(function(res,rej){
+    var fr=new FileReader();
+    fr.onload=function(){
+      var img=new Image();
+      img.onload=function(){
+        var w=img.width, h=img.height, e=Math.min(1, maxLado/Math.max(w,h));
+        var cv=document.createElement("canvas");
+        cv.width=Math.round(w*e); cv.height=Math.round(h*e);
+        cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+        res({dataUrl:cv.toDataURL("image/jpeg",calidad), w:cv.width, h:cv.height});
+      };
+      img.onerror=function(){ rej(new Error("No se pudo leer la imagen")); };
+      img.src=fr.result;
+    };
+    fr.onerror=function(){ rej(new Error("No se pudo abrir el archivo")); };
+    fr.readAsDataURL(file);
+  });
+}
+function agregarFotos(input){
+  var files=Array.prototype.slice.call(input.files||[]);
+  if(!files.length) return;
+  msg("Procesando "+files.length+" foto(s)…");
+  var i=0;
+  (function siguiente(){
+    if(i>=files.length){ input.value=""; pintarGaleria(); guardarBorrador();
+      msg("✓ "+files.length+" foto(s) añadidas."); return; }
+    comprimir(files[i],1280,0.72).then(function(r){
+      var f={id:"f"+Date.now()+"_"+i, dataUrl:r.dataUrl, desc:"", elemento:"", ts:new Date().toISOString()};
+      fotos.push(f);
+      return guardarFotoBD(f);
+    }).catch(function(e){ msg("⚠ Una foto no se pudo procesar: "+e.message); })
+      .then(function(){ i++; siguiente(); });
+  })();
+}
+function pintarGaleria(){
+  $("nFotos").textContent = fotos.length? "("+fotos.length+")" : "";
+  $("galeria").innerHTML = fotos.map(function(f,i){
+    return "<div class='miniatura' onclick='abrirVisor("+i+")'><img src='"+f.dataUrl+"' alt=''>"+
+      (f.desc||f.elemento ? "<div class='pie'>"+esc(f.elemento||"")+(f.desc?(f.elemento?" · ":"")+esc(f.desc):"")+"</div>" : "")+
+      "</div>";
+  }).join("");
+}
+function abrirVisor(i){
+  _fotoAbierta=i; var f=fotos[i];
+  $("visorImg").src=f.dataUrl; $("visorDesc").value=f.desc||""; $("visorElem").value=f.elemento||"";
+  $("visor").style.display="flex";
+}
+function cerrarVisor(){
+  if(_fotoAbierta!==null){
+    var f=fotos[_fotoAbierta];
+    f.desc=$("visorDesc").value.trim(); f.elemento=$("visorElem").value;
+    guardarFotoBD(f);
+  }
+  _fotoAbierta=null; $("visor").style.display="none"; pintarGaleria(); guardarBorrador();
+}
+function borrarFoto(){
+  if(_fotoAbierta===null) return;
+  if(!confirm("¿Borrar esta foto?")) return;
+  var f=fotos[_fotoAbierta];
+  borrarFotoBD(f.id).then(function(){
+    fotos.splice(_fotoAbierta,1); _fotoAbierta=null;
+    $("visor").style.display="none"; pintarGaleria(); guardarBorrador(); msg("Foto borrada.");
+  });
+}
+function leer(){
+  var o={};
+  ["estructura","direccion","municipio","fecha","solicitante","profesional","matricula",
+   "uso","sistema","pisos","sotanos","ano","area","evento",
+   "restricciones","recomendaciones","observaciones"].forEach(function(k){ o[k]=($(k).value||"").trim(); });
+  o.danos=JSON.parse(JSON.stringify(danos));
+  o.sitio=JSON.parse(JSON.stringify(chks));
+  o.requiere_detallada=$("detallada").checked;
+  o.evacuacion_inmediata=$("evacuacion").checked;
+  o.clasificacion=dict;
+  o.sugerencia=sugerir();
+  o.tipo="post_sismo";
+  o.fotos=fotos.map(function(f){ return {id:f.id, desc:f.desc||"", elemento:f.elemento||"", ts:f.ts}; });
+  return o;
+}
+function guardar(){
+  try{
+    var o=leer();
+    if(!o.estructura){
+      var ee=$("estructura");
+      ee.style.borderColor="var(--rojo)"; ee.style.borderWidth="2px";
+      ee.style.background="#fdecea"; ee.placeholder="◀ FALTA: escribe aquí el nombre";
+      msg("⚠ Falta el nombre de la estructura — es el primer campo, arriba del todo.");
+      window.scrollTo({top:0,behavior:"smooth"});
+      setTimeout(function(){ ee.focus(); },400);
+      return; }
+    $("estructura").style.borderColor=""; $("estructura").style.borderWidth="";
+    $("estructura").style.background="";
+    // Antes esto abría un confirm() si faltaba el dictamen. En el móvil ese diálogo puede no
+    // aparecer o cerrarse solo, y la función salía SIN GUARDAR y sin decir nada. En campo nunca
+    // hay que bloquear un guardado con un diálogo: se guarda siempre y se avisa después.
+    var faltaDictamen = !o.clasificacion;
+    o.id="v"+Date.now(); o.guardado=new Date().toISOString();
+    var vs=cargar(); vs.push(o);
+    try{
+      localStorage.setItem("visitas_postsismo", JSON.stringify(vs));
+    }catch(err){
+      // Si no cabe en el teléfono, el trabajo NO se pierde: se descarga como archivo al momento.
+      msg("⚠ No cupo en el teléfono ("+(err&&err.name?err.name:"error")+"). Se descarga la visita como archivo para no perderla.");
+      var b=new Blob([JSON.stringify({app:"visita_postsismo",v:1,visitas:[o]},null,1)],{type:"application/json"});
+      var a=document.createElement("a"); a.href=URL.createObjectURL(b);
+      a.download="visita_rescate_"+o.id+".json";
+      document.body.appendChild(a); a.click(); a.remove();
+      return;
+    }
+    // comprobar que de verdad quedó escrito, no fiarse de que setItem no lanzara
+    var comprobar=cargar();
+    if(!comprobar.some(function(x){ return x.id===o.id; })){
+      msg("⚠ El teléfono NO conservó la visita. Suele pasar al abrir el archivo desde la app de Dropbox: "+
+          "descárgalo y ábrelo con Chrome o Safari. Se descarga ahora como archivo para no perderla.");
+      var b2=new Blob([JSON.stringify({app:"visita_postsismo",v:1,visitas:[o]},null,1)],{type:"application/json"});
+      var a2=document.createElement("a"); a2.href=URL.createObjectURL(b2);
+      a2.download="visita_rescate_"+o.id+".json";
+      document.body.appendChild(a2); a2.click(); a2.remove();
+      return;
+    }
+    limpiarBorrador();
+    msg("✓ Guardada «"+o.estructura+"» con "+(o.fotos||[]).length+" foto(s)."+
+        (faltaDictamen? " OJO: quedó SIN DICTAMEN." : "")+" Mírala en la lista de abajo.");
+    pintarLista();
+    var l=$("lista"); if(l) l.scrollIntoView({block:"center",behavior:"smooth"});
+  }catch(err){
+    msg("⚠ Error al guardar: "+(err&&err.message?err.message:err)+" — dime este mensaje tal cual.");
+  }
+}
+function cargar(){ try{ return JSON.parse(localStorage.getItem("visitas_postsismo")||"[]"); }catch(e){ return []; } }
+function guardarTodas(vs){ localStorage.setItem("visitas_postsismo", JSON.stringify(vs)); }
+// Si la visita se sube copiando el JSON, el teléfono no se entera: por eso no dice «pendiente».
+// Solo marca «✓ subida» cuando le consta de verdad (envío directo).
+function pintarLista(){
+  var vs=cargar(); $("cuenta").textContent=vs.length?("("+vs.length+")"):"";
+  $("lista").innerHTML = vs.length? vs.slice().reverse().map(function(v){
+    var c=v.clasificacion||"sin";
+    var nf=(v.fotos||[]).length;
+    return "<div><span>"+esc(v.estructura)+"<br><span class='nota'>"+(v.fecha||v.guardado.slice(0,10))+
+      (nf?" · "+nf+" foto"+(nf>1?"s":""):"")+(v.enviado?" · <b>✓ subida</b>":"")+
+      "</span></span>"+
+      "<span class='pill "+c+"'>"+(v.clasificacion?v.clasificacion.toUpperCase():"SIN DICTAMEN")+"</span>"+
+      "<button class='borrar' onclick=\"borrarVisita('"+v.id+"')\" title='Borrar esta visita'>✕</button></div>";
+  }).join("") : "<div class='nota'>Todavía no has guardado ninguna.</div>";
+  pintarEnvio();
+}
+/* Sin esto no había NINGUNA forma de quitar una visita desde la app, y la salida natural era ir a
+   borrar el archivo HTML — que no borra la visita (vive en el navegador) y sí borra la aplicación. */
+function borrarVisita(id){
+  var vs=cargar(), i=-1;
+  for(var k=0;k<vs.length;k++) if(vs[k].id===id){ i=k; break; }
+  if(i<0){ msg("Esa visita ya no está."); pintarLista(); return; }
+  var v=vs[i], nf=(v.fotos||[]).length;
+  if(!confirm("¿Borrar la visita «"+v.estructura+"»"+(nf?" y sus "+nf+" foto"+(nf>1?"s":""):"")+
+      "?\n\nEsto no se puede deshacer."+
+      (v.enviado? "\n\nOJO: ya está subida a la base. Borrarla aquí NO la quita de allí.":""))) return;
+  vs.splice(i,1);
+  guardarTodas(vs);
+  // Las fotos viven aparte (IndexedDB); si no se borran también, ocupan sitio para siempre.
+  Promise.all((v.fotos||[]).map(function(f){ return borrarFotoBD(f.id); }))
+    .catch(function(){})
+    .then(function(){ pintarLista(); msg("Borrada la visita «"+v.estructura+"»."); });
+}
+
+/* ============ ENVÍO DIRECTO AL HARNESS ============
+   Cuando hay señal, esto ahorra el paso del archivo. Va de UNA visita por petición: si se cae la
+   red a mitad, lo enviado queda enviado y se reintenta solo el resto. Marcar `enviado` es seguro
+   porque la importación es idempotente por `id_local`: reenviar actualiza, nunca duplica. */
+var HARNESS_URL   = "";   // ← pegar aquí la dirección del servidor, p.ej. https://algo.up.railway.app
+var HARNESS_TOKEN = "";   // ← pegar aquí el VISITAS_INGEST_TOKEN
+
+function pendientes(){ return cargar().filter(function(v){ return !v.enviado; }); }
+function pintarEnvio(){
+  var b=$("btnEnviar"); if(!b) return;
+  var n=pendientes().length;
+  b.style.display = (HARNESS_URL && n) ? "block" : "none";
+  b.textContent = "Enviar al harness ("+n+" pendiente"+(n>1?"s":"")+")";
+}
+function marcarEnviada(id){
+  var vs=cargar();
+  for(var i=0;i<vs.length;i++) if(vs[i].id===id){ vs[i].enviado=new Date().toISOString(); break; }
+  guardarTodas(vs);
+}
+function enviarUna(v, intento){
+  intento = intento || 1;
+  return construirPayload(true, [v]).then(function(p){
+    return fetch(HARNESS_URL.replace(/\/$/,"")+"/webhook/visitas", { method:"POST",
+      headers:{ "content-type":"application/json", "x-visitas-token":HARNESS_TOKEN },
+      body:p.texto });
+  }).then(function(r){
+    // 4xx = el servidor la rechazó por lo que es; reintentar no la va a arreglar.
+    if(r.status>=400 && r.status<500) return r.json().catch(function(){ return {error:"rechazada ("+r.status+")"}; })
+      .then(function(j){ throw new Error(j.error||("rechazada ("+r.status+")")); });
+    if(!r.ok) throw new Error("el servidor falló ("+r.status+")");
+    return r.json();
+  }).catch(function(e){
+    if(intento>=3 || /rechazada|más de 25 MB|Token/.test(e.message)) throw e;
+    return new Promise(function(res){ setTimeout(res, intento*2000); })   // espera 2 s, luego 4 s
+      .then(function(){ return enviarUna(v, intento+1); });
+  });
+}
+function enviarAlHarness(){
+  if(!HARNESS_URL){ msg("Todavía no está configurada la dirección del harness. Usa «Copiar JSON»."); return; }
+  var cola=pendientes();
+  if(!cola.length){ msg("No hay visitas pendientes de enviar."); return; }
+  if(!navigator.onLine){ msg("Sin señal. Se enviarán solas en cuanto vuelva la conexión."); return; }
+  $("btnEnviar").disabled=true;
+  var hechas=0, fallo=null;
+  (function siguiente(i){
+    if(i>=cola.length){
+      $("btnEnviar").disabled=false; pintarLista();
+      msg(fallo? "Enviadas "+hechas+" de "+cola.length+". Se paró en «"+fallo.donde+"»: "+fallo.error+
+                 " Las que faltan siguen guardadas aquí."
+               : "✓ Enviadas "+hechas+" visita(s) al harness, con sus fotos.");
+      return;
+    }
+    msg("Enviando "+(i+1)+" de "+cola.length+": "+cola[i].estructura+"…");
+    enviarUna(cola[i]).then(function(){
+      marcarEnviada(cola[i].id); hechas++; siguiente(i+1);
+    }).catch(function(e){
+      fallo={donde:cola[i].estructura, error:e.message}; siguiente(cola.length);
+    });
+  })(0);
+}
+// Si se guardaron visitas sin señal, salen solas cuando vuelva.
+window.addEventListener("online", function(){
+  if(HARNESS_URL && pendientes().length) enviarAlHarness();
+});
+function esc(s){ return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}); }
+function nueva(){
+  if(!confirm("¿Empezar una visita nueva? Se limpia el formulario (lo guardado no se pierde).")) return;
+  ["estructura","direccion","solicitante","area","evento","restricciones","recomendaciones","observaciones"]
+    .forEach(function(k){ $(k).value=""; });
+  ["uso","sistema"].forEach(function(k){ $(k).value=""; });
+  ["pisos","sotanos","ano"].forEach(function(k){ $(k).value=""; });
+  danos={}; chks={}; dict=null; fotos=[]; pintarGaleria();
+  document.querySelectorAll(".grados button").forEach(function(b){ b.classList.remove("on"); });
+  document.querySelectorAll(".dict button").forEach(function(b){ b.classList.remove("on"); });
+  document.querySelectorAll(".chk input").forEach(function(c){ c.checked=false; });
+  limpiarBorrador(); sugerir(); msg("Formulario en blanco.");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+/* ============ SALIDA DE DATOS ============
+   Tres caminos, del mejor al peor, y los tres conviven. En iOS el archivo descargado cae en un
+   limbo del sistema y en una prueba real se compartió seis veces el HTML en lugar del JSON (mismo
+   prefijo de nombre y el móvil oculta la extensión). El portapapeles evita el sistema de archivos
+   por completo, así que es el camino recomendado cuando no hay red.
+   El contrato del payload no se toca: la función SQL rechaza lo que no traiga app="visita_postsismo". */
+
+// Única fuente del payload: la usan exportar(), copiarJSON() y el envío al harness.
+function construirPayload(conFotos, soloEstas){
+  var vs = soloEstas || cargar();
+  var ids=[]; vs.forEach(function(v){ (v.fotos||[]).forEach(function(f){ ids.push(f.id); }); });
+  var quiere = conFotos && ids.length>0;
+  return (quiere? leerFotosBD(ids) : Promise.resolve([])).then(function(imgs){
+    var mapa={}; imgs.forEach(function(f){ mapa[f.id]=f.dataUrl; });
+    var copia=JSON.parse(JSON.stringify(vs));
+    copia.forEach(function(v){ (v.fotos||[]).forEach(function(f){ if(mapa[f.id]) f.imagen=mapa[f.id]; }); });
+    return { texto: JSON.stringify({app:"visita_postsismo", v:1, exportado:new Date().toISOString(),
+                incluye_fotos:quiere, visitas:copia}, null, 1),
+             nFotos: imgs.length, conFotos: quiere, nVisitas: vs.length, idsFoto: ids };
+  });
+}
+function tam(txt){ var mb=txt.length/1048576;
+  return mb<0.1? Math.round(txt.length/1024)+" KB" : mb.toFixed(1)+" MB"; }
+
+function exportar(){
+  var vs=cargar();
+  if(!vs.length){ msg("No hay visitas guardadas todavía."); return; }
+  // Nada de confirm(): en el móvil puede no aparecer y se exportaba SIN fotos sin avisar.
+  // Por defecto van incluidas; para el archivo ligero está la casilla "solo datos".
+  var conFotos = !($("soloDatos") && $("soloDatos").checked);
+  msg("Preparando el archivo…");
+  construirPayload(conFotos).then(function(p){
+    var b=new Blob([p.texto],{type:"application/json"}), a=document.createElement("a");
+    a.href=URL.createObjectURL(b);
+    a.download="visitas_postsismo_"+new Date().toISOString().slice(0,10)+".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },1500);
+    msg((p.conFotos? "✓ Exportadas "+p.nVisitas+" visita(s) CON "+p.nFotos+" foto(s)"
+                   : "✓ Exportadas "+p.nVisitas+" visita(s) SIN fotos"+(p.idsFoto.length? " (marcaste «solo datos»)":""))+
+        " · "+tam(p.texto)+". OJO: en el teléfono es fácil compartir por error este HTML en vez del "+
+        "archivo .json; si te pasa, usa «Copiar JSON».");
+  });
+}
+
+// Camino recomendado sin red: evita el sistema de archivos por completo.
+function copiarJSON(){
+  var vs=cargar();
+  if(!vs.length){ msg("No hay visitas guardadas todavía."); return; }
+  msg("Preparando el texto…");
+  // Siempre sin fotos: el portapapeles no es canal para megas de base64. Reimportar sin fotos
+  // NO borra las que ya estén subidas (la función SQL las conserva).
+  construirPayload(false).then(function(p){
+    function aMano(){ mostrarJSONParaCopiar(p.texto, p.nVisitas); }
+    if(!navigator.clipboard || !navigator.clipboard.writeText){ aMano(); return; }
+    navigator.clipboard.writeText(p.texto).then(function(){
+      msg("✓ "+p.nVisitas+" visita(s) copiadas al portapapeles ("+tam(p.texto)+", sin fotos). "+
+          "Pégalo en «Visitas técnicas — consulta».");
+    }).catch(function(){ aMano(); });   // Safari en file:// suele bloquear la Clipboard API
+  });
+}
+// Plan B: el texto a la vista y ya seleccionado, para copiar con «Toca y mantén → Copiar».
+function mostrarJSONParaCopiar(txt, n){
+  var d=$("copiaBox");
+  $("copiaTxt").value=txt;
+  $("copiaInfo").textContent=n+" visita(s) · "+tam(txt)+" · sin fotos";
+  d.style.display="flex";
+  setTimeout(function(){
+    var t=$("copiaTxt"); t.focus(); t.setSelectionRange(0, t.value.length);
+    try{ t.select(); }catch(e){}
+  },80);
+  msg("⚠ El teléfono no dejó copiar automáticamente. Toca el texto, mantén pulsado y elige «Copiar».");
+}
+function cerrarCopia(){ $("copiaBox").style.display="none"; }
+function copiarDesdeCaja(){
+  var t=$("copiaTxt");
+  t.focus(); t.setSelectionRange(0, t.value.length);
+  var ok=false;
+  try{ ok=document.execCommand("copy"); }catch(e){ ok=false; }   // solo aquí, como último recurso
+  msg(ok? "✓ Copiado. Pégalo en «Visitas técnicas — consulta»."
+        : "⚠ No se pudo copiar solo: mantén pulsado sobre el texto y elige «Copiar».");
+}
+var _msgT=null;
+function msg(t){
+  var e=$("estado"); if(!e) return;
+  e.textContent=t;
+  e.classList.toggle("mal", /^⚠/.test(t));
+  e.classList.add("ver");
+  if(_msgT) clearTimeout(_msgT);
+  // los avisos de error se quedan más tiempo: son los que hay que leer
+  _msgT=setTimeout(function(){ e.classList.remove("ver"); }, /^⚠/.test(t)? 9000 : 4000);
+}
+
+pintarGrados($("gEst"),EST);
+pintarGrados($("gNoEst"),NOEST);
+pintarChks($("gSitio"),SITIO);
+$("fecha").value=new Date().toISOString().slice(0,10);
+// En el móvil no hay consola: cualquier fallo interno se muestra en la barra de estado.
+window.addEventListener("error", function(ev){
+  var m=$("estado"); if(m) m.textContent="⚠ Fallo interno: "+ev.message+" (línea "+(ev.lineno||"?")+")";
+});
+window.addEventListener("unhandledrejection", function(ev){
+  var m=$("estado"); if(m) m.textContent="⚠ Fallo interno: "+(ev.reason&&ev.reason.message?ev.reason.message:ev.reason);
+});
+CAMPOS.forEach(function(k){ var e=$(k); if(e){ e.addEventListener("input",guardarBorrador);
+  e.addEventListener("change",guardarBorrador); } });
+["detallada","evacuacion"].forEach(function(k){ var e=$(k); if(e) e.addEventListener("change",guardarBorrador); });
+sugerir(); pintarLista(); pintarGaleria();
+(function(){
+  // Comprobar de entrada si este navegador conserva datos. Los visores de archivos dentro de
+  // apps (Dropbox, correo, WhatsApp) a menudo NO lo hacen, y entonces nada de lo que se guarde
+  // sobrevive: más vale saberlo antes de la visita que después.
+  var sirve=false;
+  try{ localStorage.setItem("_p","1"); sirve=(localStorage.getItem("_p")==="1"); localStorage.removeItem("_p"); }catch(e){ sirve=false; }
+  if(!sirve){
+    var av=document.createElement("div");
+    av.style.cssText="background:#D8443A;color:#fff;padding:12px 16px;font-size:14px;line-height:1.45";
+    av.innerHTML="<b>Este visor no guarda datos.</b> Lo que registres se perderá. "+
+      "Descarga el archivo al teléfono y ábrelo con Chrome o Safari, no desde la app de Dropbox o del correo.";
+    document.body.insertBefore(av, document.body.firstChild.nextSibling);
+  }
+  var b=hayBorrador(); if(b) restaurarBorrador(b);
+})();
+
+/* ============ FUNCIONAR SIN SEÑAL ============
+   El service worker guarda la aplicación entera en el teléfono la primera vez que se abre
+   con señal. A partir de ahí abre igual en modo avión, en un sótano o en vereda sin
+   cobertura. Esto NO se puede hacer con el archivo suelto (file://): el navegador solo lo
+   permite en una dirección web con HTTPS. Es la razón de haber montado el subdominio.
+
+   La cabecera dice en cada momento si ya está guardada, porque en campo hay que saberlo
+   ANTES de salir, no al llegar y descubrir que no abre. */
+(function(){
+  var sub = document.querySelector("header .sub");
+  function estado(txt, listo){
+    if(!sub) return;
+    sub.innerHTML = 'INICON · ' + txt +
+      (listo ? ' · <b>funciona sin señal</b>' : '') +
+      ' · se guarda en este navegador';
+  }
+  if(!("serviceWorker" in navigator)){
+    estado("navegador sin soporte sin conexión", false);
+    return;
+  }
+  navigator.serviceWorker.register("sw.js").then(function(reg){
+    if(navigator.serviceWorker.controller){
+      estado("✓ guardada en el teléfono", true);
+    }else{
+      estado("guardando en el teléfono…", false);
+      // A la primera visita el service worker aún no controla la página; cuando toma el
+      // control ya está todo descargado y se puede salir a la calle sin señal.
+      navigator.serviceWorker.addEventListener("controllerchange", function(){
+        estado("✓ guardada en el teléfono", true);
+        msg("✓ Ya puedes usarla sin señal. Añádela a la pantalla de inicio: Compartir → Añadir a inicio.");
+      });
+    }
+  }).catch(function(e){
+    estado("no se pudo guardar para uso sin señal", false);
+  });
+})();
+</script>

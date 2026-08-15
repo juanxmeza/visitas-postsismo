@@ -1,0 +1,26 @@
+{
+  "name": "Visita técnica post-sismo — INICON",
+  "short_name": "Visita Sismo",
+  "description": "Formato de campo para evaluación rápida de estructuras tras un sismo.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef1f5",
+  "theme_color": "#185FA5",
+  "lang": "es-CO",
+  "icons": [
+    {
+      "src": "icono-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
